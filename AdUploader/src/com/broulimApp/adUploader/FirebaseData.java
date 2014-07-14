@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 //import java.util.Base64.*;
 
+
 import org.shaded.apache.commons.codec.binary.Base64;
 
 import com.firebase.client.DataSnapshot;
@@ -19,13 +20,14 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
 public class FirebaseData {
+
 	
-	public boolean saveAd(File adPicture, String adName, String adDesc, String adPrice, String adExp) {
+	public boolean saveAd(WeeklyAdItem ad) {
 		try {
 
 			// Reading a Image file from file system
-			FileInputStream imageInFile = new FileInputStream(adPicture);
-			byte imageData[] = new byte[(int) adPicture.length()];
+			FileInputStream imageInFile = new FileInputStream(ad.getPictureUrl());
+			byte imageData[] = new byte[(int) ad.getPictureUrl().length()];
 			imageInFile.read(imageData);
 
 			// Converting Image byte array into Base64 String
@@ -33,17 +35,20 @@ public class FirebaseData {
 			if (imageDataString == null) {
 				imageDataString = "Did not work!";
 			}
+			
+			String fireBaseUrl = "https://incandescent-fire-4835.firebaseio.com/TestAd/" + ad.getStoreName();
+			Firebase f = new Firebase(fireBaseUrl);
 
-			Firebase f = new Firebase(
-					"https://incandescent-fire-4835.firebaseio.com/TestAd");
-
-			// add first and last name inputted
+			// add all items to object and push to Firebase
 			Map<String, Object> toSet = new HashMap<String, Object>();
-			toSet.put("adPicture", imageDataString);
-			toSet.put("Name", adName);
-			toSet.put("Description", adDesc);
-			toSet.put("Price", adPrice);
-			toSet.put("Expiration", adExp);
+			
+			toSet.put("Name", ad.getAdName());
+			toSet.put("Category", ad.getCategory());
+			toSet.put("Description", ad.getAdDescript());
+			toSet.put("Price", ad.getPrice());
+			toSet.put("Ad_Start", ad.getAdStartDate());
+			toSet.put("Ad_End", ad.getAdEndDate());
+			toSet.put("Ad_Picture", imageDataString);
 			f.push().setValue(toSet);
 
 			imageInFile.close();
